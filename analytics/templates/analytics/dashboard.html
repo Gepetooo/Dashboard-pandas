@@ -1,22 +1,13 @@
-{% load l10n %}
+{% load l10n static %}
 <!doctype html>
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Análise exploratória do Titanic</title>
+  <link rel="stylesheet" href="{% static 'analytics/dashboard.css' %}">
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <script src="https://cdn.plot.ly/plotly-locale-pt-br-latest.js"></script>
-  <style>
-    :root{color-scheme:dark;--bg:#0b1020;--panel:#141b2d;--text:#f2f5fc;--muted:#94a1bb;--line:#26324a;--mint:#65d6ad;--blue:#8d9eff;--radius:18px}
-    *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 12% -10%,#1a2a48 0,transparent 38%),var(--bg);color:var(--text);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
-    .shell{width:min(1440px,100% - 44px);margin:0 auto;padding:42px 0 60px}.eyebrow{color:var(--mint);font-size:.76rem;font-weight:750;letter-spacing:.16em;text-transform:uppercase}.heading{display:flex;justify-content:space-between;align-items:flex-end;gap:28px;margin:12px 0 28px}.heading h1{font-size:clamp(2rem,4vw,3.45rem);line-height:1.05;letter-spacing:-.045em;margin:0;max-width:780px}.heading p{max-width:440px;color:var(--muted);margin:10px 0 0}.source-links{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:18px}.source{white-space:nowrap;color:#c8d1e4;text-decoration:none;border-bottom:1px solid #54617b;font-size:.88rem;padding-bottom:3px}.source:hover{color:var(--mint)}
-    .filters{display:grid;grid-template-columns:minmax(150px,1fr) minmax(150px,1fr) minmax(250px,1.4fr) minmax(220px,auto);gap:14px;align-items:end;padding:18px;background:rgba(20,27,45,.9);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:18px}.field{min-width:0}.field label{display:block;color:var(--muted);font-size:.78rem;margin:0 0 7px}.field select,.field input{width:100%;height:44px;min-height:44px;border:1px solid #35435f;border-radius:10px;background:#0e1526;color:var(--text);padding:9px 11px;font:inherit}.age-range{display:flex;gap:7px}.age-range input[type=number]{flex:1;min-width:0}.actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;align-self:end}.button{display:flex;min-width:0;min-height:44px;align-items:center;justify-content:center;border:0;border-radius:10px;padding:10px 12px;font:inherit;font-weight:700;text-align:center;text-decoration:none;cursor:pointer}.button.primary{background:var(--mint);color:#08231b}.button.secondary{background:#26324a;color:var(--text)}
-    .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:0 0 18px}.card,.chart,.quality{background:linear-gradient(145deg,rgba(25,34,56,.98),rgba(18,25,42,.98));border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 12px 34px #05091440}.card{padding:18px 20px}.card-label{color:var(--muted);font-size:.8rem}.card-value{font-size:1.8rem;font-weight:750;letter-spacing:-.03em;margin-top:6px}.card-unit{color:var(--muted);font-size:.76rem;margin-top:2px}
-    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.chart{padding:10px 10px 0;min-height:360px}.plot{height:350px;width:100%}.bottom{display:grid;grid-template-columns:1.15fr .85fr;gap:14px;margin-top:14px}.quality{padding:22px}.quality h2{font-size:1rem;margin:0 0 4px}.quality p{font-size:.8rem;color:var(--muted);margin:0 0 14px}.table-scroll{overflow-x:auto}.summary-table{min-width:680px}.table{width:100%;border-collapse:collapse;font-size:.83rem}.table td,.table th{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line)}.table th{color:var(--muted);font-weight:550}.table td:last-child,.table th:last-child{text-align:right}.error{background:#3a2028;border:1px solid #8e4356;padding:17px;border-radius:12px;margin:20px 0}.footer{color:var(--muted);font-size:.78rem;margin-top:18px}.footer a{color:#c8d1e4}
-    @media(max-width:900px){.heading{align-items:flex-start;flex-direction:column}.source-links{justify-content:flex-start}.filters{grid-template-columns:1fr 1fr}.filters .field:first-child{grid-column:1/-1}.actions{grid-column:1/-1}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.bottom{grid-template-columns:1fr}}
-    @media(max-width:600px){.shell{width:min(100% - 24px,1440px);padding-top:28px}.filters{grid-template-columns:1fr}.filters .field:first-child{grid-column:auto}.actions{grid-column:auto;grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.chart{min-height:320px}.plot{height:310px}.card{padding:15px}.card-value{font-size:1.5rem}}
-  </style>
 </head>
 <body>
   <main class="shell">
@@ -36,55 +27,135 @@
       <div class="error">{{ error }} <a href="{{ source_url }}">Fonte dos dados</a></div>
     {% else %}
       <form class="filters" method="get">
-        <div class="field"><label for="sex">Sexo</label><select id="sex" name="sex"><option value="all" {% if selected_sex == 'all' %}selected{% endif %}>Todos</option>{% for value in sex_options %}<option value="{{ value }}" {% if selected_sex == value %}selected{% endif %}>{% if value == 'female' %}Feminino{% elif value == 'male' %}Masculino{% else %}{{ value|capfirst }}{% endif %}</option>{% endfor %}</select></div>
-        <div class="field"><label for="passenger_class">Classe</label><select id="passenger_class" name="passenger_class"><option value="all" {% if selected_class == 'all' %}selected{% endif %}>Todas</option><option value="1" {% if selected_class == '1' %}selected{% endif %}>1ª classe</option><option value="2" {% if selected_class == '2' %}selected{% endif %}>2ª classe</option><option value="3" {% if selected_class == '3' %}selected{% endif %}>3ª classe</option></select></div>
-        <div class="field"><label for="age_min">Faixa de idade (anos)</label><div class="age-range"><input id="age_min" name="age_min" type="number" min="{{ minimum_age|unlocalize }}" max="{{ maximum_age|unlocalize }}" step="any" value="{{ age_min|unlocalize }}" aria-label="Idade mínima"><input id="age_max" name="age_max" type="number" min="{{ minimum_age|unlocalize }}" max="{{ maximum_age|unlocalize }}" step="any" value="{{ age_max|unlocalize }}" aria-label="Idade máxima"></div></div>
-        <div class="actions"><button class="button primary" type="submit">Atualizar</button><a class="button secondary" href="{% url 'painel_analitico' %}">Limpar</a></div>
+        <div class="field">
+          <label for="sex">Sexo</label>
+          <select id="sex" name="sex">
+            <option value="all" {% if selected_sex == 'all' %}selected{% endif %}>Todos</option>
+            {% for value in sex_options %}
+              <option value="{{ value }}" {% if selected_sex == value %}selected{% endif %}>
+                {% if value == 'female' %}Feminino{% elif value == 'male' %}Masculino{% else %}{{ value|capfirst }}{% endif %}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field">
+          <label for="passenger_class">Classe</label>
+          <select id="passenger_class" name="passenger_class">
+            <option value="all" {% if selected_class == 'all' %}selected{% endif %}>Todas</option>
+            <option value="1" {% if selected_class == '1' %}selected{% endif %}>1ª classe</option>
+            <option value="2" {% if selected_class == '2' %}selected{% endif %}>2ª classe</option>
+            <option value="3" {% if selected_class == '3' %}selected{% endif %}>3ª classe</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="age_min">Faixa de idade (anos)</label>
+          <div class="age-range">
+            <input id="age_min" name="age_min" type="number" min="{{ minimum_age|unlocalize }}" max="{{ maximum_age|unlocalize }}" step="any" value="{{ age_min|unlocalize }}" aria-label="Idade mínima">
+            <input id="age_max" name="age_max" type="number" min="{{ minimum_age|unlocalize }}" max="{{ maximum_age|unlocalize }}" step="any" value="{{ age_max|unlocalize }}" aria-label="Idade máxima">
+          </div>
+        </div>
+        <div class="actions">
+          <button class="button primary" type="submit">Atualizar</button>
+          <a class="button secondary" href="{% url 'painel_analitico' %}">Limpar</a>
+        </div>
       </form>
 
       <section class="cards" aria-label="Estatísticas descritivas">
-        <article class="card"><div class="card-label">Passageiros no recorte</div><div class="card-value">{{ descriptive.count|floatformat:0 }}</div><div class="card-unit">registros</div></article>
-        <article class="card"><div class="card-label">Sobreviventes</div><div class="card-value">{{ descriptive.survivors|floatformat:0 }}</div><div class="card-unit">registros classificados como sobreviventes</div></article>
-        <article class="card"><div class="card-label">Taxa de sobrevivência</div><div class="card-value">{% if descriptive.survival_rate is not None %}{{ descriptive.survival_rate|floatformat:1 }}%{% else %}—{% endif %}</div><div class="card-unit">no recorte selecionado</div></article>
-        <article class="card"><div class="card-label">Mediana da tarifa</div><div class="card-value">{% if descriptive.median_fare is not None %}{{ descriptive.median_fare|floatformat:2 }}{% else %}—{% endif %}</div><div class="card-unit">unidades monetárias do conjunto</div></article>
+        <article class="card">
+          <div class="card-label">Passageiros no recorte</div>
+          <div class="card-value">{{ descriptive.count|floatformat:0 }}</div>
+          <div class="card-unit">registros</div>
+        </article>
+        <article class="card">
+          <div class="card-label">Sobreviventes</div>
+          <div class="card-value">{{ descriptive.survivors|floatformat:0 }}</div>
+          <div class="card-unit">registros classificados como sobreviventes</div>
+        </article>
+        <article class="card">
+          <div class="card-label">Taxa de sobrevivência</div>
+          <div class="card-value">
+            {% if descriptive.survival_rate is not None %}
+              {{ descriptive.survival_rate|floatformat:1 }}%
+            {% else %}
+              —
+            {% endif %}
+          </div>
+          <div class="card-unit">no recorte selecionado</div>
+        </article>
+        <article class="card">
+          <div class="card-label">Mediana da tarifa</div>
+          <div class="card-value">
+            {% if descriptive.median_fare is not None %}
+              {{ descriptive.median_fare|floatformat:2 }}
+            {% else %}
+              —
+            {% endif %}
+          </div>
+          <div class="card-unit">unidades monetárias do conjunto</div>
+        </article>
       </section>
 
       <section class="grid" aria-label="Visualizações">
-        <article class="chart"><div id="class_survival" class="plot"></div></article>
-        <article class="chart"><div id="age_distribution" class="plot"></div></article>
-        <article class="chart"><div id="fare_distribution" class="plot"></div></article>
-        <article class="chart"><div id="embark_survival" class="plot"></div></article>
-        <article class="chart"><div id="age_trend" class="plot"></div></article>
-        <article class="chart"><div id="correlation" class="plot"></div></article>
+        <article class="chart"><div class="plot" id="class_survival"></div></article>
+        <article class="chart"><div class="plot" id="age_distribution"></div></article>
+        <article class="chart"><div class="plot" id="fare_distribution"></div></article>
+        <article class="chart"><div class="plot" id="embark_survival"></div></article>
+        <article class="chart"><div class="plot" id="age_trend"></div></article>
+        <article class="chart"><div class="plot" id="correlation"></div></article>
       </section>
 
       <section class="bottom">
         <article class="quality">
           <h2>Qualidade e distribuição dos dados</h2>
           <p>Percentual de valores ausentes por variável no recorte aplicado.</p>
-          <table class="table"><thead><tr><th>Variável</th><th>Ausentes</th></tr></thead><tbody>
-            {% for item in missingness %}<tr><td>{{ item.label }}</td><td>{{ item.percent|floatformat:1 }}%</td></tr>{% endfor %}
-          </tbody></table>
+          <table class="table">
+            <thead>
+              <tr><th>Variável</th><th>Ausentes</th></tr>
+            </thead>
+            <tbody>
+              {% for item in missingness %}
+                <tr><td>{{ item.label }}</td><td>{{ item.percent|floatformat:1 }}%</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </article>
         <article class="quality">
           <h2>Estatísticas descritivas</h2>
           <p>Resumo de Pandas para os registros disponíveis nos filtros.</p>
-          <div class="table-scroll"><table class="table summary-table"><thead><tr><th>Variável</th><th>N</th><th>Média</th><th>Desvio padrão</th><th>Mínimo</th><th>Mediana</th><th>Máximo</th></tr></thead><tbody>
-            {% for item in descriptive_table %}<tr><td>{{ item.label }}</td><td>{{ item.count }}</td><td>{% if item.mean is not None %}{{ item.mean|floatformat:2 }}{% else %}—{% endif %}</td><td>{% if item.std is not None %}{{ item.std|floatformat:2 }}{% else %}—{% endif %}</td><td>{% if item.min is not None %}{{ item.min|floatformat:2 }}{% else %}—{% endif %}</td><td>{% if item.median is not None %}{{ item.median|floatformat:2 }}{% else %}—{% endif %}</td><td>{% if item.max is not None %}{{ item.max|floatformat:2 }}{% else %}—{% endif %}</td></tr>{% endfor %}
-          </tbody></table></div>
+          <div class="table-scroll">
+            <table class="table summary-table">
+              <thead>
+                <tr>
+                  <th>Variável</th>
+                  <th>N</th>
+                  <th>Média</th>
+                  <th>Desvio padrão</th>
+                  <th>Mínimo</th>
+                  <th>Mediana</th>
+                  <th>Máximo</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in descriptive_table %}
+                  <tr>
+                    <td>{{ item.label }}</td>
+                    <td>{{ item.count }}</td>
+                    <td>{% if item.mean is not None %}{{ item.mean|floatformat:2 }}{% else %}—{% endif %}</td>
+                    <td>{% if item.std is not None %}{{ item.std|floatformat:2 }}{% else %}—{% endif %}</td>
+                    <td>{% if item.min is not None %}{{ item.min|floatformat:2 }}{% else %}—{% endif %}</td>
+                    <td>{% if item.median is not None %}{{ item.median|floatformat:2 }}{% else %}—{% endif %}</td>
+                    <td>{% if item.max is not None %}{{ item.max|floatformat:2 }}{% else %}—{% endif %}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
           <p class="footer">Tarifas sinalizadas pela regra IQR: {{ descriptive.outliers }}. Permanecem nos dados. Correlações indicam associação linear, não causalidade.</p>
         </article>
       </section>
       <div class="footer">A idade e o convés têm valores ausentes; esses valores não foram imputados. Fonte: <a href="{{ repository_url }}" target="_blank" rel="noreferrer">Seaborn Data Repository · Titanic</a>.</div>
       {{ charts|json_script:"charts-data" }}
-      <script>
-        const charts = JSON.parse(document.getElementById('charts-data').textContent);
-        const baseLayout = {paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)',font:{color:'#cbd4e6',family:'Inter,system-ui,sans-serif',size:11},title:{font:{size:15,color:'#f2f5fc'},x:0.04,xanchor:'left'},margin:{l:58,r:22,t:54,b:48},legend:{orientation:'h',y:-0.22},xaxis:{gridcolor:'#26324a',zerolinecolor:'#26324a'},yaxis:{gridcolor:'#26324a',zerolinecolor:'#26324a'}};
-        for (const name of ['class_survival','age_distribution','fare_distribution','embark_survival','age_trend','correlation']) {
-          const target = document.getElementById(name);
-          Plotly.newPlot(target, charts[name].data, {...baseLayout,...charts[name].layout}, {responsive:true,displaylogo:false,locale:'pt-br',modeBarButtonsToRemove:['lasso2d','select2d']});
-        }
-      </script>
+      <script src="{% static 'analytics/dashboard.js' %}"></script>
     {% endif %}
   </main>
 </body>
