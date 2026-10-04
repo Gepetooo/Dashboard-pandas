@@ -1,7 +1,7 @@
 import pandas as pd
 from django.shortcuts import render
 
-from .data import DATASET_URL, carregar_conjunto_dados
+from .data import DATASET_REPOSITORY_URL, DATASET_URL, carregar_conjunto_dados
 
 
 MISSING_COLUMNS = {
@@ -45,6 +45,7 @@ def exibir_painel(request):
         return render(request, 'analytics/dashboard.html', {
             'error': 'Não foi possível carregar o arquivo CSV local. Confira se dashboard/data/titanic.csv está presente no projeto.',
             'source_url': DATASET_URL,
+            'repository_url': DATASET_REPOSITORY_URL,
         })
 
     minimum_age = float(frame['age'].min())
@@ -197,6 +198,7 @@ def exibir_painel(request):
     }
     context = {
         'source_url': DATASET_URL,
+        'repository_url': DATASET_REPOSITORY_URL,
         'sex_options': sex_options,
         'selected_sex': sex,
         'selected_class': passenger_class,

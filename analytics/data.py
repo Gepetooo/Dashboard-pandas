@@ -5,6 +5,7 @@ import pandas as pd
 
 
 DATASET_URL = 'https://raw.githubusercontent.com/mwaskom/seaborn-data/master/titanic.csv'
+DATASET_REPOSITORY_URL = 'https://github.com/mwaskom/seaborn-data'
 DATASET_PATH = Path(__file__).resolve().parents[1] / 'data' / 'titanic.csv'
 DATASET_COLUMNS = [
     'survived',
