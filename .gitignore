@@ -5,3 +5,4 @@ __pycache__/
 venv/
 .env
 staticfiles/
+/Apresentacao_Dashboard_Titanic.pdf

@@ -2,7 +2,7 @@
 
 Aplicação Django com análise em Pandas e visualizações interativas em Plotly.js. Os filtros permitem explorar sexo, classe e faixa etária. As visualizações comparam taxa de sobrevivência por classe e sexo, distribuição de idade por desfecho, tarifas por classe, passageiros por local de embarque, taxa por faixa etária e correlações entre variáveis numéricas.
 
-A estrutura da página está em `analytics/templates/analytics/dashboard.html`, os estilos em `analytics/static/analytics/dashboard.css` e a inicialização dos gráficos em `analytics/static/analytics/dashboard.js`.
+A view principal em `analytics/views.py` coordena o fluxo. Os filtros estão em `analytics/filtros.py`, as estatísticas em `analytics/estatisticas.py` e os dados/configurações dos gráficos em `analytics/graficos.py`. A estrutura da página está em `analytics/templates/analytics/dashboard.html`, os estilos em `analytics/static/analytics/dashboard.css` e a inicialização dos gráficos em `analytics/static/analytics/dashboard.js`.
 
 ## Dados utilizados
 
